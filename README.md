@@ -197,3 +197,4 @@ MIT License - Free to use!
 **Note:** When the bot runs for the first time, it checks the last 10 items from each RSS feed but only posts new ones. All sources share one `posted_links.json` file, so the same article won't be posted twice even if it appears in multiple feeds."# NamibiaTelegram" 
 "# NamibiaTelegram" 
 "# Test" 
+"# NamibiaTelegram" 
