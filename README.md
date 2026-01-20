@@ -1,200 +1,167 @@
-# RSS to Telegram Bot - Namibia News 🇳🇦
+# RSS to Telegram Bot
 
-This bot automatically posts Namibian news from multiple RSS feeds to your Telegram group. All posts include beautiful formatting, thumbnails, headings, intro text, and the Namibia flag.
+Bu bot, Yeni Bakış Haber RSS beslemesinden otomatik olarak Telegram kanalınıza haber gönderir. Thumbnail görsellerle birlikte güzel formatlı mesajlar paylaşır.
 
-## 🎯 Features
+## 🎯 Özellikler
 
-- ✅ Automatic news posting from 4 different Namibian RSS sources:
-  - 📰 Google News - Namibia Sports
-  - 📰 EIN News - Namibia
-  - 📰 The Namibian
-  - 💼 Jobs4NA
-- ✅ All posts include thumbnail images
-- ✅ Beautiful HTML formatting with:
-  - 🇳🇦 Namibia flag
-  - 📌 Category-based icons
-  - 📝 Article headlines
-  - 📄 Article intro/summary
-  - 🔗 Read more links
-- ✅ Prevents duplicate posts
-- ✅ Runs every 10 minutes automatically
-- ✅ Rate limit protection
-- ✅ Image optimization
+- ✅ RSS'den otomatik haber çekme
+- ✅ Her haberle birlikte thumbnail görseli
+- ✅ Güzel formatlanmış mesajlar (HTML)
+- ✅ Kategori bazlı emojiler
+- ✅ Yinelenen paylaşımları önleme
+- ✅ 10 dakikada bir otomatik kontrol
+- ✅ Rate limit koruması
+- ✅ Görsel optimizasyonu
 
-## 📋 Setup Steps
+## 📋 Kurulum Adımları
 
-### 1. Create Telegram Bot
+### 1. Telegram Bot Oluşturma
 
-1. Start a conversation with [@BotFather](https://t.me/BotFather) on Telegram
-2. Send the `/newbot` command
-3. Choose a name for your bot (e.g., "Namibia News Bot")
-4. Choose a username for your bot (e.g., "namibia_news_bot")
-5. BotFather will give you a **bot token**. Save it!
+1. Telegram'da [@BotFather](https://t.me/BotFather) ile konuşma başlatın
+2. `/newbot` komutunu gönderin
+3. Bot için bir isim seçin (örn: "Yeni Bakış Haber Bot")
+4. Bot için bir kullanıcı adı seçin (örn: "yenibakishaber_bot")
+5. BotFather size bir **bot token** verecek. Bunu kaydedin!
 
-### 2. Get Chat ID
+### 2. Chat ID Bulma
 
-**For a group:**
-1. Add your bot to the group as admin
-2. Send a message in the group
-3. Visit this URL: `https://api.telegram.org/bot<BOT_TOKEN>/getUpdates`
-   (Replace BOT_TOKEN with your actual token)
-4. Find your chat ID in the response: `"chat":{"id":-100XXXXXXXXX}`
-5. Save the chat ID (e.g., `-1001234567890`)
+**Kanal için:**
+1. Botunuzu kanalınıza admin olarak ekleyin
+2. Kanala bir mesaj gönderin
+3. Şu URL'yi ziyaret edin: `https://api.telegram.org/bot<BOT_TOKEN>/getUpdates`
+   (BOT_TOKEN yerine kendi tokenınızı yazın)
+4. Yanıtta `"chat":{"id":-100XXXXXXXXX}` şeklinde chat ID'nizi bulacaksınız
+5. Chat ID'yi kaydedin (örn: `-1001234567890`)
 
-**For a channel:**
-1. Add your bot to the channel as admin
-2. Post a message in the channel
-3. Follow the same steps as above
+**Özel grup için:**
+1. Botunuzu gruba admin olarak ekleyin
+2. Gruba bir mesaj gönderin ve yukarıdaki adımları tekrarlayın
 
-**To send to yourself:**
-1. Start a conversation with [@userinfobot](https://t.me/userinfobot)
-2. The bot will send you your chat ID (e.g., `123456789`)
+**Kendinize göndermek için:**
+1. [@userinfobot](https://t.me/userinfobot) ile konuşma başlatın
+2. Bot size chat ID'nizi verecek (örn: `123456789`)
 
-### 3. GitHub Repository Setup
+### 3. GitHub Repository Kurulumu
 
-1. Fork this repository or create a new one
-2. Add these files to your repository:
+1. Bu repository'yi fork edin veya yeni bir repository oluşturun
+2. Dosyaları repository'nize ekleyin:
    - `post_to_telegram.py`
    - `.github/workflows/rss-to-telegram.yml`
 
-### 4. Configure GitHub Secrets
+### 4. GitHub Secrets Ayarlama
 
-In your repository, go to **Settings** → **Secrets and variables** → **Actions** → **New repository secret**:
+Repository'nizde **Settings** → **Secrets and variables** → **Actions** → **New repository secret**:
 
 1. **TELEGRAM_BOT_TOKEN**
-   - Value: Your bot token from BotFather (e.g., `123456789:ABCdefGHIjklMNOpqrsTUVwxyz`)
+   - Value: BotFather'dan aldığınız token (örn: `123456789:ABCdefGHIjklMNOpqrsTUVwxyz`)
 
 2. **TELEGRAM_CHAT_ID**
-   - Value: Your group/channel/personal chat ID (e.g., `-1001234567890` or `123456789`)
+   - Value: Kanal/Grup/Kişi chat ID'niz (örn: `-1001234567890` veya `123456789`)
 
-### 5. Enable Workflow
+### 5. Workflow'u Etkinleştirme
 
-1. Go to the **Actions** tab in your repository
-2. Enable the workflow
-3. Click **Run workflow** to test it immediately
+1. Repository'de **Actions** sekmesine gidin
+2. Workflow'u enable edin
+3. İlk çalışma için **Run workflow** butonuna tıklayın
 
-## 🚀 How It Works
+## 🚀 Kullanım
 
-The bot automatically:
-- Checks **4 different Namibian RSS feeds** every 10 minutes:
-  1. **Google News - Namibia Sports** - Latest sports news
-  2. **EIN News - Namibia** - General Namibian news
-  3. **The Namibian** - Official newspaper feed
-  4. **Jobs4NA** - Job listings and career news
-- Finds new articles
-- Posts them to your Telegram group with thumbnails
-- Saves posted articles in `posted_links.json` (shared across all sources)
+Bot otomatik olarak:
+- Her 10 dakikada bir RSS beslemesini kontrol eder
+- Yeni haberleri bulur
+- Thumbnail ile birlikte Telegram'a gönderir
+- Gönderilen haberleri `posted_links.json` dosyasında saklar
 
-## 🎨 Message Format
+## 🎨 Mesaj Formatı
 
 ```
-🇳🇦 ⚽ Namibia News
+📰 Yeni Haber
 
-Article Headline Goes Here
+[Haber Başlığı]
 
-Brief summary or introduction of the article...
+📂 Kategori
 
-📂 Sports
-
-🔗 Read full article
+🔗 Devamı için tıklayın
 ```
 
-## 📸 Thumbnail Sources
+## 📸 Thumbnail Kaynakları
 
-The bot searches for thumbnails in this order:
-1. RSS enclosure (image in feed)
-2. Google News media_content
-3. Open Graph image (og:image meta tag)
-4. Twitter Card image
-5. Featured image on article page
-6. First large image in article content
+Bot sırasıyla şu kaynaklardan thumbnail arar:
+1. RSS enclosure (feed'deki görsel)
+2. Open Graph image (og:image meta tag)
+3. Twitter Card image
+4. WordPress featured image
+5. İçerikteki ilk büyük görsel
 
-## ⚙️ Customization
+## ⚙️ Özelleştirme
 
-### Change RSS Feeds
-Edit `rss-to-telegram.yml` to add or change feeds:
-
+### RSS URL Değiştirme
+`rss-to-telegram.yml` dosyasında:
 ```yaml
-- name: Run RSS bot - Your Source Name
-  env:
-    RSS_URL: https://example.com/feed
-    TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-    TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-  run: |
-    python post_to_telegram.py
+env:
+  RSS_URL: https://www.yenibakishaber.com/rss  # Buraya istediğiniz RSS URL'i yazın
 ```
 
-**Current Sources:**
-1. `https://news.google.com/news/rss/headlines/section/q/namibia%20sports/namibia%20sports?ned=us&hl=en`
-2. `http://www.einnews.com/rss/ENeMt6E9jOtjDuWx`
-3. `https://www.namibian.com.na/feed/`
-4. `https://www.jobs4na.com/feed/`
-
-### Change Check Frequency
-Edit `rss-to-telegram.yml`:
-
+### Kontrol Sıklığını Değiştirme
+`rss-to-telegram.yml` dosyasında:
 ```yaml
 schedule:
-  - cron: "*/10 * * * *"  # Every 10 minutes (you can change this)
+  - cron: "*/10 * * * *"  # Her 10 dakika (değiştirebilirsiniz)
 ```
 
-Examples:
-- `*/5 * * * *` - Every 5 minutes
-- `*/15 * * * *` - Every 15 minutes
-- `*/30 * * * *` - Every 30 minutes
-- `0 * * * *` - Every hour
+Örnekler:
+- `*/5 * * * *` - Her 5 dakika
+- `*/15 * * * *` - Her 15 dakika
+- `*/30 * * * *` - Her 30 dakika
+- `0 * * * *` - Her saat başı
 
-### Customize Category Emojis
-Edit the `category_emojis` dictionary in `post_to_telegram.py`.
+### Kategori Emojileri Özelleştirme
+`post_to_telegram.py` dosyasında `category_emojis` sözlüğünü düzenleyin.
 
-### Change Post Limit
-In `post_to_telegram.py`:
-
+### Mesaj Sınırını Değiştirme
+`post_to_telegram.py` dosyasında:
 ```python
-MAX_ENTRIES_TO_PROCESS = 10  # How many articles to process per run
+MAX_ENTRIES_TO_PROCESS = 10  # Bir seferde kaç haber işlensin
 ```
 
-## 🔍 Troubleshooting
+## 🔍 Sorun Giderme
 
-### "Unauthorized" Error
-- Check your bot token
-- Get a new token from BotFather
+### "Unauthorized" Hatası
+- Bot token'ınızı kontrol edin
+- BotFather'dan yeni bir token alın
 
-### "Chat not found" Error
-- Verify your chat ID is correct
-- Make sure the bot is added to the group/channel as admin
+### "Chat not found" Hatası
+- Chat ID'nin doğru olduğundan emin olun
+- Botu kanala/gruba admin olarak ekleyin
 
-### "Message is too long" Error
-- The bot automatically truncates long summaries
-- You can adjust limits in the `create_beautiful_post` function
+### "Message is too long" Hatası
+- Haber başlıkları çok uzunsa bot otomatik kısaltır
+- Gerekirse `create_beautiful_post` fonksiyonunu düzenleyin
 
-### No Images Being Posted
-- Check if the RSS feed contains images
-- Check internet connectivity
-- Verify Telegram's 10MB image size limit isn't exceeded
+### Görsel Gönderilmiyor
+- RSS'de görsel var mı kontrol edin
+- İnternet bağlantısını kontrol edin
+- Telegram'ın görsel boyut sınırına (10MB) dikkat edin
 
-### Bot Posting Duplicates
-- Ensure `posted_links.json` is being committed
-- Check that GitHub Actions has write permissions
+### Bot Tekrar Ediyor
+- `posted_links.json` dosyası commit edilmeli
+- GitHub Actions'ın dosya yazma izni olmalı
 
-## 📝 View Logs
+## 📝 Log Kontrol
 
-1. Go to the **Actions** tab in your repository
-2. Click on the latest workflow run
-3. Click on the "post-to-telegram" job
-4. View detailed logs
+1. GitHub repository'de **Actions** sekmesine gidin
+2. Son workflow run'ına tıklayın
+3. "post-to-telegram" job'ına tıklayın
+4. Detaylı logları görün
 
-## 🤝 Contributing
+## 🤝 Katkıda Bulunma
 
-Pull requests are welcome!
+Pull request'ler memnuniyetle karşılanır!
 
-## 📄 License
+## 📄 Lisans
 
-MIT License - Free to use!
+MIT License - Özgürce kullanabilirsiniz!
 
 ---
 
-**Note:** When the bot runs for the first time, it checks the last 10 items from each RSS feed but only posts new ones. All sources share one `posted_links.json` file, so the same article won't be posted twice even if it appears in multiple feeds."# NamibiaTelegram" 
-"# NamibiaTelegram" 
-"# Test" 
-"# NamibiaTelegram" 
+**Not:** Bot ilk çalıştığında RSS'deki son 10 haberi kontrol eder ama sadece yeni olanları gönderir. Daha önce gönderilmiş haberler tekrar gönderilmez.
