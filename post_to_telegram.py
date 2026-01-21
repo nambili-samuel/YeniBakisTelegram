@@ -162,6 +162,99 @@ def clean_html(text):
     text = text.replace(']]>', '')
     return text.strip()
 
+def extract_intro_from_content(summary, max_length=200):
+    """Extract a clean introduction from the summary/description"""
+    if not summary:
+        return None
+    
+    # Clean the summary
+    intro = clean_html(summary)
+    
+    # Remove common patterns
+    intro = re.sub(r'(Devamı için|Haberi oku|Tıklayın|Kaynak:).*$', '', intro, flags=re.IGNORECASE)
+    intro = re.sub(r'https?://\S+', '', intro)  # Remove URLs
+    
+    # Trim to reasonable length at sentence boundary
+    if len(intro) > max_length:
+        # Try to cut at sentence end
+        sentences = re.split(r'[.!?]+\s+', intro)
+        intro = sentences[0]
+        if len(intro) > max_length:
+            # If still too long, cut at word boundary
+            intro = intro[:max_length].rsplit(' ', 1)[0] + '...'
+        else:
+            intro += '.'
+    
+    intro = intro.strip()
+    
+    # Return only if we have meaningful content
+    if len(intro) > 30:
+        return intro
+    
+    return None
+
+def fetch_article_content(article_url):
+    """Fetch article content including intro/description from the page"""
+    if not article_url or article_url == '#':
+        return None
+    
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+        }
+        
+        print(f"📄 Makale içeriği çekiliyor: {article_url}")
+        response = requests.get(article_url, timeout=15, headers=headers)
+        response.encoding = 'utf-8'
+        
+        if response.status_code != 200:
+            print(f"⚠ Makale sayfası yüklenemedi: HTTP {response.status_code}")
+            return None
+        
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Try Open Graph description first (most reliable)
+        og_desc = soup.find('meta', property='og:description')
+        if og_desc and og_desc.get('content'):
+            content = og_desc['content'].strip()
+            if len(content) > 30:
+                print(f"✅ İçerik bulundu (og:description): {len(content)} karakter")
+                return content
+        
+        # Try meta description
+        meta_desc = soup.find('meta', attrs={'name': 'description'})
+        if meta_desc and meta_desc.get('content'):
+            content = meta_desc['content'].strip()
+            if len(content) > 30:
+                print(f"✅ İçerik bulundu (meta description): {len(content)} karakter")
+                return content
+        
+        # Try first paragraph in article content
+        content_selectors = [
+            '.entry-content p',
+            'article p',
+            '.post-content p',
+            '.content p',
+            'main p'
+        ]
+        
+        for selector in content_selectors:
+            paragraphs = soup.select(selector)
+            for p in paragraphs[:3]:  # Check first 3 paragraphs
+                text = p.get_text().strip()
+                if len(text) > 50:  # Meaningful paragraph
+                    print(f"✅ İçerik bulundu (article paragraph): {len(text)} karakter")
+                    return text
+        
+        print("⚠ Makale içeriği bulunamadı")
+        return None
+        
+    except Exception as e:
+        print(f"❌ Makale içeriği okuma hatası: {e}")
+        return None
+
 def fetch_article_thumbnail(article_url):
     """Fetch featured image from WordPress article page"""
     if not article_url or article_url == '#':
@@ -277,8 +370,8 @@ def extract_youtube_thumbnail(entry, link):
     print("⚠ YouTube thumbnail bulunamadı")
     return None
 
-def create_beautiful_post(title, link, category=""):
-    """Create a beautiful, professional Telegram post with proper formatting"""
+def create_beautiful_post(title, link, category="", intro=None):
+    """Create a beautiful, professional Telegram post with heading and introduction"""
     
     # Decode HTML entities in title
     title = clean_html(title)
@@ -303,6 +396,10 @@ def create_beautiful_post(title, link, category=""):
         'AYDIN': '🌆',
         'MAGAZİN': '⭐',
         'HAYAT': '🌟',
+        'EĞİTİM': '📚',
+        'BİLİM': '🔬',
+        'ÇEVRE': '🌱',
+        'OTOMOTİV': '🚗',
     }
     
     # Try to find matching category
@@ -312,11 +409,30 @@ def create_beautiful_post(title, link, category=""):
             emoji = cat_emoji
             break
     
-    # Create post with beautiful formatting using Telegram HTML
-    post_text = f"<b>{emoji} Yeni Haber</b>\n\n"
+    # Create post with enhanced professional formatting
+    # Header with decorative line
+    post_text = f"┏━━━━━━━━━━━━━━━━━━━━┓\n"
+    post_text += f"  {emoji} <b>{category.upper()}</b>\n"
+    post_text += f"┗━━━━━━━━━━━━━━━━━━━━┛\n\n"
+    
+    # Main title - bold and prominent
     post_text += f"<b>{title}</b>\n\n"
-    post_text += f"📂 <i>{category}</i>\n\n"
-    post_text += f"🔗 <a href='{link}'>Devamı için tıklayın</a>"
+    
+    # Introduction if available
+    if intro:
+        intro_text = extract_intro_from_content(intro, max_length=180)
+        if intro_text:
+            post_text += f"📝 <i>{intro_text}</i>\n\n"
+    
+    # Divider
+    post_text += f"{'─' * 30}\n\n"
+    
+    # Call to action with link
+    post_text += f"📖 <a href='{link}'>Haberin Tamamını Oku</a>\n\n"
+    
+    # Timestamp
+    current_time = datetime.now().strftime('%d.%m.%Y • %H:%M')
+    post_text += f"🕐 <i>{current_time}</i>"
     
     return post_text
 
@@ -388,8 +504,12 @@ def post_to_telegram(entry):
     is_youtube = 'youtube.com' in RSS_URL.lower() or 'youtu.be' in RSS_URL.lower()
     
     thumbnail_url = None
+    intro_text = None
+    
     if is_youtube:
         thumbnail_url = extract_youtube_thumbnail(entry, link)
+        # For YouTube, use the summary as intro
+        intro_text = summary
     else:
         # For WordPress, try RSS enclosure first, then fetch from article page
         if hasattr(entry, 'enclosures') and entry.enclosures:
@@ -398,14 +518,28 @@ def post_to_telegram(entry):
                 print(f"✅ RSS enclosure bulundu: {enclosure_url}")
                 thumbnail_url = enclosure_url
         
-        # If no enclosure, fetch from article page
-        if not thumbnail_url:
-            thumbnail_url = fetch_article_thumbnail(link)
+        # Try to get intro from RSS summary first
+        if summary and len(summary) > 30:
+            intro_text = summary
+            print(f"✅ RSS özeti kullanılıyor: {len(summary)} karakter")
+        
+        # If no thumbnail or intro, fetch from article page
+        if not thumbnail_url or not intro_text:
+            # Fetch article page content once for both thumbnail and intro
+            try:
+                article_content = fetch_article_content(link)
+                if article_content and not intro_text:
+                    intro_text = article_content
+                    
+                if not thumbnail_url:
+                    thumbnail_url = fetch_article_thumbnail(link)
+            except Exception as e:
+                print(f"⚠ Makale sayfası işlenirken hata: {e}")
     
     # Fetch thumbnail image
     image_data = None
     if thumbnail_url:
-        print(f"📸 Thumbnail işleniyor...")
+        print(f"🔸 Thumbnail işleniyor...")
         image_data = fetch_image(thumbnail_url)
         
         if image_data:
@@ -415,8 +549,8 @@ def post_to_telegram(entry):
     else:
         print(f"⚠ Thumbnail bulunamadı, devam ediliyor...")
     
-    # Create beautiful post text
-    post_text = create_beautiful_post(title, link, category)
+    # Create beautiful post text with intro
+    post_text = create_beautiful_post(title, link, category, intro_text)
     
     # Post to Telegram
     print(f"\n📤 Telegram'a gönderiliyor...")
@@ -429,6 +563,7 @@ def post_to_telegram(entry):
         print(f"\n✅ BAŞARIYLA PAYLAŞILDI!")
         print(f"📌 Başlık: {title}")
         print(f"📂 Kategori: {category}")
+        print(f"📝 İçerik: {'Var ✔' if intro_text else 'Yok ✗'}")
         print(f"🔗 Link: {link}")
         print(f"🖼️ Thumbnail: {'Evet ✔' if image_data else 'Hayır ✗'}")
         print(f"⏰ Zaman: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -456,7 +591,7 @@ posted_links = load_posted_links()
 print(f"📊 Daha önce paylaşılan link sayısı: {len(posted_links)}")
 
 # Test Telegram connection
-print(f"\n🔐 Telegram bağlantısı test ediliyor...")
+print(f"\n🔍 Telegram bağlantısı test ediliyor...")
 try:
     response = requests.get(f"{TELEGRAM_API_URL}/getMe", timeout=10)
     response.raise_for_status()
@@ -485,7 +620,7 @@ for i, entry in enumerate(entries_to_process):
     # Skip if already posted
     if link in posted_links:
         title = clean_html(entry.title)[:60]
-        print(f"\n⏭ Zaten paylaşıldı: {title}...")
+        print(f"\n⭕ Zaten paylaşıldı: {title}...")
         continue
     
     # Post to Telegram
