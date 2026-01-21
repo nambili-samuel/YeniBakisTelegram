@@ -409,11 +409,9 @@ def create_beautiful_post(title, link, category="", intro=None):
             emoji = cat_emoji
             break
     
-    # Create post with enhanced professional formatting
-    # Header with decorative line
-    post_text = f"┏━━━━━━━━━━━━━━━━━━━━┓\n"
-    post_text += f"  {emoji} <b>{category.upper()}</b>\n"
-    post_text += f"┗━━━━━━━━━━━━━━━━━━━━┛\n\n"
+    # Create post with clean professional formatting
+    # Category header
+    post_text = f"{emoji} <b>{category.upper()}</b>\n\n"
     
     # Main title - bold and prominent
     post_text += f"<b>{title}</b>\n\n"
@@ -423,9 +421,6 @@ def create_beautiful_post(title, link, category="", intro=None):
         intro_text = extract_intro_from_content(intro, max_length=180)
         if intro_text:
             post_text += f"📝 <i>{intro_text}</i>\n\n"
-    
-    # Divider
-    post_text += f"{'─' * 30}\n\n"
     
     # Call to action with link
     post_text += f"📖 <a href='{link}'>Haberin Tamamını Oku</a>\n\n"
