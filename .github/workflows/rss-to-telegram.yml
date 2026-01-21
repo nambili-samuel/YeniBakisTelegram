@@ -23,9 +23,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install feedparser requests Pillow beautifulsoup4
 
-      - name: Run Telegram RSS bot
+      - name: Run WordPress RSS bot (yenibakisgazetesi.com)
+        env:
+          RSS_URL: https://yenibakisgazetesi.com/feed/
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python post_to_telegram.py
+
+      - name: Run WordPress RSS bot (yenibakishaber.com)
         env:
           RSS_URL: https://www.yenibakishaber.com/rss
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python post_to_telegram.py
+
+      - name: Run YouTube RSS bot
+        env:
+          RSS_URL: https://www.youtube.com/feeds/videos.xml?channel_id=UCPM8fdDZH_cwTgXUBsmj8Qw
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
