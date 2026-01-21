@@ -392,7 +392,7 @@ def create_beautiful_post(title, link, category="", intro=None):
         'POLİTİKA': '🏛️',
         'HABER': '📢',
         'GÜNCEL': '🆕',
-        'İZMİR': '🏙️',
+        'İZMİR': '🇹🇷',
         'AYDIN': '🌆',
         'MAGAZİN': '⭐',
         'HAYAT': '🌟',
